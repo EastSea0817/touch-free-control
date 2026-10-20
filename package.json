@@ -1,0 +1,42 @@
+{
+  "name": "touch-free-control",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Touch-free computer control with a webcam (DA200 individual project)",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "node scripts/fetch-mediapipe.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "desktop": "npm run build && electron .",
+    "desktop:dist": "npm run build && electron-builder --win portable"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "1.1.1",
+    "koffi": "3.3.3"
+  },
+  "devDependencies": {
+    "electron": "44.8.0",
+    "electron-builder": "26.15.3",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "edu.da200.touchfreecontrol",
+    "productName": "Touch-free Control",
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "directories": {
+      "output": "release"
+    }
+  }
+}

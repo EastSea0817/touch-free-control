@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Touch-free Control</title>
+    <meta name="description" content="Control the screen with head movement and facial gestures. Camera frames stay on this device." />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar" aria-label="Status">
+      <div class="brand">Touch-free Control</div>
+      <div class="status">
+        <span id="camera-status" class="chip chip-off" aria-live="polite"><span class="dot"></span><span class="label">Camera off</span></span>
+        <span id="state-badge" class="badge state-ACTIVE" aria-live="assertive">ACTIVE</span>
+      </div>
+      <div id="indicators" class="indicators" aria-label="What I detect right now">
+        <span class="ind" id="ind-face"><span class="ind-name">Face</span></span>
+        <span class="ind" id="ind-click"><span class="ind-name">Click</span><span class="meter"><span class="fill"></span><span class="mark"></span></span></span>
+        <span class="ind" id="ind-eyes"><span class="ind-name">Eyes closed</span><span class="meter"><span class="fill"></span></span></span>
+        <span class="ind hidden" id="ind-hand"><span class="ind-name">Hand</span></span>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-home">Home</button>
+        <button class="btn" id="btn-pause" data-role="pause">Pause</button>
+        <button class="btn" id="btn-settings">Settings</button>
+      </div>
+    </header>
+
+    <main id="app">
+      <!-- Onboarding: 3 steps, every step usable with the virtual cursor -->
+      <section class="screen hidden" id="screen-onboarding" aria-labelledby="onb-title">
+        <div class="onb-step" data-step="1">
+          <h1 id="onb-title">Welcome</h1>
+          <p class="lead">I built this app so people can use a computer without touching it. You move the cursor by turning your head.</p>
+          <div class="card">
+            <h2>Your privacy</h2>
+            <ul class="big-list">
+              <li>The camera image is processed <strong>on this device only</strong>.</li>
+              <li>No video or photo is stored, recorded or sent anywhere.</li>
+              <li>Only your settings are saved, in this browser.</li>
+            </ul>
+          </div>
+          <p class="hint how-to-press"></p>
+          <div class="row"><button class="btn btn-big btn-primary" data-onb-next>Next</button></div>
+        </div>
+        <div class="onb-step hidden" data-step="2">
+          <h1>Camera check</h1>
+          <ul class="checks">
+            <li id="chk-face"><span class="mark">…</span> I can see your face</li>
+            <li id="chk-distance"><span class="mark">…</span> Your distance from the camera is good</li>
+            <li id="chk-center"><span class="mark">…</span> Your face is near the middle of the camera view</li>
+          </ul>
+          <p class="hint">Tips: put a light in front of you (not behind), and place the camera at about eye level. Look at the preview in the bottom-right corner.</p>
+          <div class="row">
+            <button class="btn btn-big" data-onb-back>Back</button>
+            <button class="btn btn-big btn-primary" data-onb-next>Next</button>
+          </div>
+        </div>
+        <div class="onb-step hidden" data-step="3">
+          <h1>Choose how to click</h1>
+          <div class="choice-row" role="group" aria-label="Click gesture">
+            <button class="btn btn-choice" data-gesture="wink"><strong>Wink</strong><span>Left eye = click, right eye = right click</span></button>
+            <button class="btn btn-choice" data-gesture="jawOpen"><strong>Open mouth</strong><span>Open wide for a moment</span></button>
+            <button class="btn btn-choice" data-gesture="browInnerUp"><strong>Raise eyebrows</strong><span>Lift them for a moment</span></button>
+          </div>
+          <div class="row">
+            <button class="btn" id="onb-dwell"></button>
+            <button class="btn" id="onb-hand"></button>
+          </div>
+          <p class="hint">Pause any time: close both eyes for 2 seconds. Do it again to resume.</p>
+          <div class="row">
+            <button class="btn btn-big" data-onb-back>Back</button>
+            <button class="btn btn-big btn-primary" id="onb-calibrate">Fit the cursor to me (calibrate)</button>
+            <button class="btn btn-big" id="onb-skip">Skip for now</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen hidden" id="screen-home" aria-labelledby="home-title">
+        <h1 id="home-title">Practice</h1>
+        <p class="hint how-to-press"></p>
+        <div class="menu">
+          <button class="btn menu-item" data-go="practice"><strong>1. Hit the targets</strong><span>Warm up with big buttons</span></button>
+          <button class="btn menu-item" data-go="news"><strong>2. Read the news</strong><span>Find and open one article</span></button>
+          <button class="btn menu-item" data-go="form"><strong>3. Fill in a form</strong><span>Choose options and save, carefully</span></button>
+          <button class="btn menu-item" data-go="settings"><strong>Settings</strong><span>Click style, timing, smoothing</span></button>
+          <button class="btn menu-item" id="home-calibrate"><strong>Calibrate</strong><span>Fit the cursor to my head range</span></button>
+          <button class="btn menu-item" data-go="onboarding"><strong>Start-up guide</strong><span>Privacy, camera check, click style</span></button>
+        </div>
+      </section>
+
+      <section class="screen hidden" id="screen-practice" aria-labelledby="practice-title">
+        <div class="screen-head">
+          <h1 id="practice-title">Hit the highlighted target</h1>
+          <p class="hint how-to-press" id="practice-hint"></p>
+        </div>
+        <div class="grid" id="target-grid"></div>
+        <div class="row">
+          <div class="score" aria-live="polite">Hits: <strong id="score">0</strong></div>
+          <button class="btn btn-danger" id="btn-reset-score" data-risk="high">Reset score</button>
+        </div>
+      </section>
+
+      <section class="screen hidden" id="screen-news" aria-labelledby="news-title">
+        <div class="task-banner" id="news-task"></div>
+        <div id="news-list">
+          <h1 id="news-title">Today's news</h1>
+          <div class="news-grid" id="news-grid"></div>
+        </div>
+        <article id="news-article" class="hidden">
+          <button class="btn btn-big" id="news-back">← Back to the news</button>
+          <h1 id="article-title"></h1>
+          <p class="article-body" id="article-body"></p>
+        </article>
+      </section>
+
+      <section class="screen hidden" id="screen-form" aria-labelledby="form-title">
+        <div class="task-banner" id="form-task"></div>
+        <h1 id="form-title">Newsletter settings</h1>
+        <div class="card">
+          <div><h2>Topic</h2><div class="choice-row" role="group" aria-label="Topic" id="form-topic"></div></div>
+          <div><h2>How often</h2><div class="choice-row" role="group" aria-label="How often" id="form-freq"></div></div>
+        </div>
+        <div class="row form-actions">
+          <button class="btn btn-big btn-primary" id="form-save">Save</button>
+          <button class="btn btn-big btn-danger" id="form-delete" data-risk="high">Delete my account</button>
+        </div>
+      </section>
+
+      <section class="screen hidden" id="screen-settings" aria-labelledby="settings-title">
+        <h1 id="settings-title">Settings</h1>
+        <p class="hint">Use − and + to change a value. Changes are saved in this browser right away.</p>
+        <div class="settings-list" id="settings-list"></div>
+        <div class="row">
+          <button class="btn btn-big" id="settings-calibrate">Calibrate again</button>
+          <button class="btn btn-big btn-danger" id="settings-reset" data-risk="high">Reset my profile</button>
+        </div>
+      </section>
+    </main>
+
+    <div class="scroll-buttons hidden" id="scroll-buttons" aria-label="Scroll the page">
+      <button class="btn" id="scroll-up" aria-label="Scroll up">▲ Up</button>
+      <button class="btn" id="scroll-down" aria-label="Scroll down">▼ Down</button>
+    </div>
+
+    <aside class="camera-panel" id="camera-panel" aria-label="Camera preview">
+      <div class="preview">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="dev-canvas" class="hidden"></canvas>
+      </div>
+      <ol class="blendshapes" id="blendshapes" aria-label="Top facial expression scores"></ol>
+      <p class="privacy">Camera frames are processed on this device only. Nothing is stored or sent.</p>
+    </aside>
+
+    <div id="dev-panel" class="dev-panel hidden" aria-label="Developer tools">
+      <strong>Dev mode</strong>
+      <span class="dev-keys">Mouse moves the cursor · C = click · P = pause</span>
+      <button class="btn btn-small" id="dev-replay-sample">Replay sample</button>
+      <label class="btn btn-small">Load recording<input type="file" id="dev-file" accept="application/json" hidden /></label>
+      <button class="btn btn-small" id="dev-record">Record 3 s</button>
+      <button class="btn btn-small" id="dev-stop-replay">Stop replay</button>
+      <span id="dev-info"></span>
+    </div>
+
+    <div id="cursor" class="cursor hidden" aria-hidden="true">
+      <svg viewBox="0 0 80 80" width="80" height="80">
+        <circle class="ring-bg" cx="40" cy="40" r="30" />
+        <circle class="ring" id="dwell-ring" cx="40" cy="40" r="30" />
+        <circle class="click-ring" id="click-ring" cx="40" cy="40" r="20" />
+        <circle class="core" cx="40" cy="40" r="8" />
+      </svg>
+    </div>
+
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
+    <div id="confirm" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="modal-card">
+        <h2 id="confirm-title">Confirm?</h2>
+        <p id="confirm-text"></p>
+        <p class="hint" id="confirm-how"></p>
+        <div class="timer"><span id="confirm-timer"></span></div>
+        <div class="modal-actions">
+          <button class="btn btn-danger btn-big" data-role="confirm" id="confirm-yes">Yes, do it</button>
+          <button class="btn btn-big" data-role="cancel" id="confirm-no">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="calibration" class="calibration hidden" aria-live="polite">
+      <div class="cal-dot" id="cal-dot"><svg viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="30" /><circle class="ring" id="cal-ring" cx="40" cy="40" r="30" /></svg></div>
+      <div class="cal-text">
+        <h2>Calibration <span id="cal-step"></span></h2>
+        <p id="cal-msg"></p>
+        <p class="hint">Use a comfortable range: you should be able to reach every corner without strain. Close both eyes for 2 seconds to cancel.</p>
+      </div>
+    </div>
+
+    <div id="paused-banner" class="paused-banner hidden" aria-live="assertive">
+      <strong>Paused.</strong> Nothing will be clicked. Close both eyes for 2 seconds to resume.
+    </div>
+
+    <div id="noface" class="noface hidden" aria-live="polite">
+      <h2>I can't see your face</h2>
+      <ul>
+        <li>Sit so your whole face is in the camera view.</li>
+        <li>Put a light in front of you, not behind you.</li>
+        <li>Place the camera at about eye level.</li>
+      </ul>
+    </div>
+
+    <div id="loading" class="overlay">
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="loading-text">Starting the camera…</p>
+    </div>
+
+    <div id="error" class="overlay hidden" role="alert">
+      <div class="error-card">
+        <h2 id="error-title"></h2>
+        <p id="error-text"></p>
+        <div class="error-actions">
+          <button class="btn btn-big" id="error-retry">Try again</button>
+          <a class="btn btn-big" id="error-replay" href="?dev=1">Try without a camera (dev mode)</a>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

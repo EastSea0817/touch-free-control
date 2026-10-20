@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:" />
+    <title>Touch-free Control</title>
+    <link rel="stylesheet" href="/src/desktop/desktop.css" />
+  </head>
+  <body>
+    <header class="top">
+      <h1>Touch-free Control</h1>
+      <span id="state" class="pill">Starting…</span>
+    </header>
+
+    <div class="preview-wrap">
+      <video id="video" muted playsinline></video>
+      <div id="face-frame" class="face-frame"></div>
+    </div>
+    <p id="flash" class="flash hidden" role="status"></p>
+    <ul id="hints" class="hints" aria-live="polite"></ul>
+
+    <!-- Setup: four step cards. A caregiver does this once; after that the app starts by itself. -->
+    <section id="setup" class="hidden">
+      <ol class="steps" id="step-dots"></ol>
+
+      <article class="card" data-step="0">
+        <h2>1. Camera and light</h2>
+        <p>Sit in front of the camera. The light, distance and position checks above must all turn green.</p>
+        <button class="big" id="next-0" disabled>Next</button>
+      </article>
+
+      <article class="card hidden" data-step="1">
+        <h2>2. Your head range</h2>
+        <p>Turn your head to five dots: the centre and the four corners of the screen. Hold still at each one. The window fills the screen while you do this.</p>
+        <button class="big" id="cal-start">Start</button>
+        <button class="big ghost" id="cal-skip">Skip (use the default range)</button>
+      </article>
+
+      <article class="card hidden" data-step="2">
+        <h2>3. How you click</h2>
+        <div class="choice" id="gesture-choice">
+          <button data-g="wink">Winks</button>
+          <button data-g="jawOpen">Mouth</button>
+          <button data-g="browInnerUp">Eyebrows</button>
+        </div>
+        <p id="gesture-help" class="muted"></p>
+        <div id="meters"></div>
+        <p class="muted">Try it now. A bar turns green when it passes the line. Use − / + until a real click passes and talking or blinking does not.</p>
+        <button class="big" id="next-2">Next</button>
+      </article>
+
+      <article class="card hidden" data-step="3">
+        <h2>4. Ready</h2>
+        <ul class="plain">
+          <li><strong>Pause or resume:</strong> close both eyes for 2 seconds, or press Ctrl+Alt+P.</li>
+          <li><strong>Re-center:</strong> look at the middle of the screen and press Ctrl+Alt+C.</li>
+          <li>While you hold a click gesture, the cursor stays still so the click lands where you aimed.</li>
+        </ul>
+        <button class="big" id="go">Start controlling the mouse</button>
+      </article>
+    </section>
+
+    <!-- Running -->
+    <section id="running" class="hidden">
+      <div id="run-meters"></div>
+      <div class="row">
+        <button class="big" id="btn-pause">Pause</button>
+        <button class="big ghost" id="btn-recenter">Re-center</button>
+      </div>
+      <details>
+        <summary>Settings</summary>
+        <div id="settings"></div>
+        <button class="ghost" id="btn-setup">Run setup again</button>
+      </details>
+      <p id="mouse-note" class="muted hidden">This computer is not Windows, so the real mouse is not moved (preview only).</p>
+    </section>
+
+    <div id="calibration" class="calibration hidden">
+      <div id="cal-dot" class="cal-dot"><span id="cal-fill"></span></div>
+      <p id="cal-msg" class="cal-msg"></p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+    <script type="module" src="/src/desktop/app.js"></script>
+  </body>
+</html>
