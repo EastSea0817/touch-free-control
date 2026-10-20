@@ -8,80 +8,222 @@
     <link rel="stylesheet" href="/src/desktop/desktop.css" />
   </head>
   <body>
-    <header class="top">
-      <h1>Touch-free Control</h1>
-      <span id="state" class="pill">Starting…</span>
-    </header>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z" /></symbol>
+      <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3.2l1.6-2h6.4l1.6 2H20a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" /><circle cx="12" cy="13" r="3.6" fill="var(--icon-hole)" /></symbol>
+      <symbol id="i-range" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" /><circle cx="12" cy="12" r="3" /></symbol>
+      <symbol id="i-click" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 1 6 6v6a6 6 0 0 1-12 0V9a6 6 0 0 1 6-6z" fill="none" stroke="currentColor" stroke-width="2" /><path d="M12 3v7" stroke="currentColor" stroke-width="2" /><path d="M6.2 9.5H12V3.1A6 6 0 0 0 6.2 9.5z" /></symbol>
+      <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M12 2.5 15 6h-2v4.9h-2V6H9zM12 21.5 9 18h2v-4.9h2V18h2zM2.5 12 6 9v2h4.9v2H6v2zM21.5 12 18 15v-2h-4.9v-2H18V9z" /></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" /><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2.9-1.2 1.8v.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /><circle cx="12" cy="17" r="1.2" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /></symbol>
+      <symbol id="i-light" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></symbol>
+      <symbol id="i-distance" viewBox="0 0 24 24"><path d="M3 12h18M6 9l-3 3 3 3M18 9l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+      <symbol id="i-center" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2" /><circle cx="12" cy="12" r="3.2" /></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" fill="none" stroke="currentColor" stroke-width="2" /><path d="M8 12.5c1.2 1.4 2.5 2 4 2s2.8-.6 4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></symbol>
+      <symbol id="i-mouth" viewBox="0 0 24 24"><ellipse cx="12" cy="13" rx="6.5" ry="4.8" fill="none" stroke="currentColor" stroke-width="2" /><path d="M7 12.5h10" stroke="currentColor" stroke-width="2" /></symbol>
+      <symbol id="i-brow" viewBox="0 0 24 24"><path d="M4 9.5c2.2-3 5.2-3.5 7-3M20 9.5c-2.2-3-5.2-3.5-7-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" /><circle cx="8" cy="14" r="2.2" /><circle cx="16" cy="14" r="2.2" /><path d="M12 3v2.5M10.2 4.5 12 2.8l1.8 1.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></symbol>
+    </svg>
 
-    <div class="preview-wrap">
-      <video id="video" muted playsinline></video>
-      <div id="face-frame" class="face-frame"></div>
-    </div>
-    <p id="flash" class="flash hidden" role="status"></p>
-    <ul id="hints" class="hints" aria-live="polite"></ul>
-
-    <!-- Setup: four step cards. A caregiver does this once; after that the app starts by itself. -->
-    <section id="setup" class="hidden">
-      <ol class="steps" id="step-dots"></ol>
-
-      <article class="card" data-step="0">
-        <h2>1. Camera and light</h2>
-        <p>Sit in front of the camera. The light, distance and position checks above must all turn green.</p>
-        <button class="big" id="next-0" disabled>Next</button>
-      </article>
-
-      <article class="card hidden" data-step="1">
-        <h2>2. Your head range</h2>
-        <p>Turn your head to five dots: the centre and the four corners of the screen. Hold still at each one. The window fills the screen while you do this.</p>
-        <button class="big" id="cal-start">Start</button>
-        <button class="big ghost" id="cal-skip">Skip (use the default range)</button>
-      </article>
-
-      <article class="card hidden" data-step="2">
-        <h2>3. How you click</h2>
-        <div class="choice" id="gesture-choice">
-          <button data-g="wink">Winks</button>
-          <button data-g="jawOpen">Mouth</button>
-          <button data-g="browInnerUp">Eyebrows</button>
+    <div class="app">
+      <!-- ============ Sidebar ============ -->
+      <aside class="side">
+        <div class="brand">
+          <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+            <rect width="40" height="40" rx="11" fill="var(--accent)" />
+            <path d="M12.5 14.5c1.2-1.5 3.2-1.5 4.4 0M23.1 14.5c1.2-1.5 3.2-1.5 4.4 0" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" />
+            <path d="M13.5 24c3.6 3.6 9.4 3.6 13 0" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" />
+          </svg>
+          <div>
+            <div class="brand-name">Touch-free Control</div>
+            <div class="brand-sub">Head &amp; face mouse</div>
+          </div>
         </div>
-        <p id="gesture-help" class="muted"></p>
-        <div id="meters"></div>
-        <p class="muted">Try it now. A bar turns green when it passes the line. Use − / + until a real click passes and talking or blinking does not.</p>
-        <button class="big" id="next-2">Next</button>
-      </article>
 
-      <article class="card hidden" data-step="3">
-        <h2>4. Ready</h2>
-        <ul class="plain">
-          <li><strong>Pause or resume:</strong> close both eyes for 2 seconds, or press Ctrl+Alt+P.</li>
-          <li><strong>Re-center:</strong> look at the middle of the screen and press Ctrl+Alt+C.</li>
-          <li>While you hold a click gesture, the cursor stays still so the click lands where you aimed.</li>
-        </ul>
-        <button class="big" id="go">Start controlling the mouse</button>
-      </article>
-    </section>
+        <nav class="nav" id="nav">
+          <button data-page="home"><svg><use href="#i-home" /></svg><span>Home</span></button>
+          <div class="nav-label">Setup</div>
+          <button data-page="camera"><svg><use href="#i-camera" /></svg><span>Camera &amp; light</span><i class="step-mark" data-for="camera"></i></button>
+          <button data-page="range"><svg><use href="#i-range" /></svg><span>Head range</span><i class="step-mark" data-for="range"></i></button>
+          <button data-page="click"><svg><use href="#i-click" /></svg><span>Click gestures</span><i class="step-mark" data-for="click"></i></button>
+          <div class="nav-label">Settings</div>
+          <button data-page="cursor"><svg><use href="#i-cursor" /></svg><span>Cursor &amp; timing</span></button>
+          <button data-page="help"><svg><use href="#i-help" /></svg><span>Shortcuts &amp; help</span></button>
+        </nav>
 
-    <!-- Running -->
-    <section id="running" class="hidden">
-      <div id="run-meters"></div>
-      <div class="row">
-        <button class="big" id="btn-pause">Pause</button>
-        <button class="big ghost" id="btn-recenter">Re-center</button>
-      </div>
-      <details>
-        <summary>Settings</summary>
-        <div id="settings"></div>
-        <button class="ghost" id="btn-setup">Run setup again</button>
-      </details>
-      <p id="mouse-note" class="muted hidden">This computer is not Windows, so the real mouse is not moved (preview only).</p>
-    </section>
+        <div class="thumb">
+          <video id="video" muted playsinline></video>
+          <span class="live">Live camera</span>
+        </div>
+      </aside>
+
+      <!-- ============ Main ============ -->
+      <main class="main">
+        <header class="topbar" id="status-card">
+          <div class="status-chip"><span class="status-dot"></span><span id="state">Starting…</span></div>
+          <button class="btn tonal" id="btn-pause">Pause</button>
+          <div class="switch-row">
+            <span id="switch-label">Mouse control</span>
+            <button class="switch" id="control-switch" role="switch" aria-checked="false" aria-labelledby="switch-label"><span></span></button>
+          </div>
+        </header>
+        <p id="flash" class="flash hidden" role="status"></p>
+        <div id="error" class="error hidden"></div>
+
+        <!-- Home -->
+        <section class="page" data-page="home">
+          <div class="hero">
+            <div class="hero-text">
+              <h1>Control your computer with your face</h1>
+              <p class="lead">Move the mouse by turning your head. Click with a wink, an open mouth or raised eyebrows. Everything runs on this computer; the camera image is never saved or sent.</p>
+              <p class="disclaimer">A student research prototype. Not a medical device.</p>
+              <div class="hero-actions">
+                <button class="btn primary" id="btn-begin">Begin setup</button>
+                <button class="btn primary hidden" id="btn-start">Start mouse control</button>
+              </div>
+            </div>
+            <svg class="hero-art" viewBox="0 0 320 220" aria-hidden="true">
+              <rect x="150" y="38" width="160" height="112" rx="10" fill="var(--art-soft)" stroke="var(--art-line)" stroke-width="4" />
+              <rect x="164" y="52" width="58" height="34" rx="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="3" />
+              <rect x="232" y="52" width="64" height="34" rx="4" fill="var(--surface)" />
+              <rect x="164" y="96" width="58" height="40" rx="4" fill="var(--surface)" />
+              <rect x="232" y="96" width="64" height="40" rx="4" fill="var(--surface)" />
+              <rect x="205" y="150" width="50" height="8" rx="3" fill="var(--art-line)" />
+              <path d="M200 70 l0 22 l6 -6 l5 10 l4 -2 l-5 -10 l8 0 z" fill="var(--text)" stroke="var(--surface)" stroke-width="1.5" />
+              <path d="M44 66c6-8 18-8 24 0M92 66c6-8 18-8 24 0" stroke="var(--accent)" stroke-width="6" fill="none" stroke-linecap="round" />
+              <circle cx="56" cy="80" r="6" fill="var(--accent)" />
+              <path d="M98 80h16" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" />
+              <path d="M80 86l-6 18h10" stroke="var(--accent)" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M58 124c12 10 32 10 44 0" stroke="var(--accent)" stroke-width="6" fill="none" stroke-linecap="round" />
+              <path d="M134 46c10 22 10 80-20 110" stroke="var(--accent)" stroke-width="6" fill="none" stroke-linecap="round" />
+              <path d="M126 98h14" stroke="var(--art-line)" stroke-width="3" stroke-dasharray="3 4" />
+            </svg>
+          </div>
+
+          <div class="tiles" id="setup-tiles">
+            <button class="tile" data-go="camera">
+              <span class="tile-icon"><svg><use href="#i-camera" /></svg></span>
+              <span class="tile-body"><b>Camera &amp; light</b><small>Check light, distance and position</small></span>
+              <i class="step-mark" data-for="camera"></i>
+            </button>
+            <button class="tile" data-go="range">
+              <span class="tile-icon"><svg><use href="#i-range" /></svg></span>
+              <span class="tile-body"><b>Head range</b><small>Fit the cursor to how far you can turn</small></span>
+              <i class="step-mark" data-for="range"></i>
+            </button>
+            <button class="tile" data-go="click">
+              <span class="tile-icon"><svg><use href="#i-click" /></svg></span>
+              <span class="tile-body"><b>Click gestures</b><small>Choose a gesture and its sensitivity</small></span>
+              <i class="step-mark" data-for="click"></i>
+            </button>
+            <button class="tile" data-go="cursor">
+              <span class="tile-icon"><svg><use href="#i-cursor" /></svg></span>
+              <span class="tile-body"><b>Cursor &amp; timing</b><small>Speed, steadiness and hold times</small></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Camera -->
+        <section class="page" data-page="camera">
+          <header class="page-head">
+            <span class="step-no">Step 1 of 3</span>
+            <h2>Camera &amp; light</h2>
+            <p>Sit in front of the camera so your whole face is visible. All three checks should turn green.</p>
+          </header>
+          <div class="camera-layout">
+            <div class="preview" id="preview-host">
+              <video id="video-big" muted playsinline></video>
+              <div id="face-frame" class="face-frame"></div>
+            </div>
+            <ul class="checks" id="checks">
+              <li data-check="light"><span class="ck-icon"><svg><use href="#i-light" /></svg></span><div><b>Light</b><small data-text></small></div><span class="ck-state"></span></li>
+              <li data-check="distance"><span class="ck-icon"><svg><use href="#i-distance" /></svg></span><div><b>Distance</b><small data-text></small></div><span class="ck-state"></span></li>
+              <li data-check="position"><span class="ck-icon"><svg><use href="#i-center" /></svg></span><div><b>Position</b><small data-text></small></div><span class="ck-state"></span></li>
+            </ul>
+          </div>
+          <div class="page-actions"><button class="btn primary" id="next-camera" disabled>Next</button></div>
+        </section>
+
+        <!-- Head range -->
+        <section class="page" data-page="range">
+          <header class="page-head">
+            <span class="step-no">Step 2 of 3</span>
+            <h2>Head range</h2>
+            <p>Five dots appear: the centre and the four corners of the screen. Turn your head toward each dot and hold still until it fills. The window covers the screen while you do this.</p>
+          </header>
+          <div class="range-art">
+            <svg viewBox="0 0 300 170" aria-hidden="true">
+              <rect x="10" y="10" width="280" height="150" rx="12" fill="var(--art-soft)" stroke="var(--art-line)" stroke-width="3" />
+              <circle cx="150" cy="85" r="11" fill="var(--accent)" />
+              <circle cx="34" cy="32" r="9" fill="none" stroke="var(--accent)" stroke-width="3" />
+              <circle cx="266" cy="32" r="9" fill="none" stroke="var(--accent)" stroke-width="3" />
+              <circle cx="34" cy="138" r="9" fill="none" stroke="var(--accent)" stroke-width="3" />
+              <circle cx="266" cy="138" r="9" fill="none" stroke="var(--accent)" stroke-width="3" />
+              <path d="M150 85 266 32" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 5" />
+            </svg>
+            <p class="muted" id="range-status"></p>
+          </div>
+          <div class="page-actions">
+            <button class="btn text" id="cal-skip">Skip and use the default range</button>
+            <button class="btn primary" id="cal-start">Start</button>
+          </div>
+        </section>
+
+        <!-- Click gestures -->
+        <section class="page" data-page="click">
+          <header class="page-head">
+            <span class="step-no">Step 3 of 3</span>
+            <h2>Click gestures</h2>
+            <p>Choose how you click, then try it. The bar turns green when your gesture passes the line. Use − and + so a real click passes and talking or blinking does not.</p>
+          </header>
+          <div class="gestures" id="gesture-choice">
+            <button class="gesture" data-g="wink"><span class="g-icon"><svg><use href="#i-eye" /></svg></span><b>Wink</b><small>Left eye = left click, right eye = right click</small></button>
+            <button class="gesture" data-g="jawOpen"><span class="g-icon"><svg><use href="#i-mouth" /></svg></span><b>Open mouth</b><small>Hold your mouth open briefly</small></button>
+            <button class="gesture" data-g="browInnerUp"><span class="g-icon"><svg><use href="#i-brow" /></svg></span><b>Raise eyebrows</b><small>Hold your eyebrows up briefly</small></button>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><b>Gesture size</b><span class="muted" id="gesture-help"></span></div>
+            <div id="meters"></div>
+          </div>
+          <div class="page-actions"><button class="btn primary" id="next-click">Finish setup</button></div>
+        </section>
+
+        <!-- Cursor -->
+        <section class="page" data-page="cursor">
+          <header class="page-head">
+            <h2>Cursor &amp; timing</h2>
+            <p>How the mouse follows your head and how long gestures are held. Changes are saved straight away.</p>
+          </header>
+          <div class="panel" id="settings"></div>
+          <div class="page-actions">
+            <button class="btn tonal" id="btn-recenter">Re-center now</button>
+          </div>
+        </section>
+
+        <!-- Help -->
+        <section class="page" data-page="help">
+          <header class="page-head">
+            <h2>Shortcuts &amp; help</h2>
+            <p>For you, or for someone helping you.</p>
+          </header>
+          <div class="panel">
+            <div class="kv"><span>Pause or resume</span><span>Close both eyes for 2 s &nbsp;·&nbsp; <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>P</kbd></span></div>
+            <div class="kv"><span>Re-center the cursor</span><span>Re-center button on the Cursor page &nbsp;·&nbsp; <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>C</kbd></span></div>
+            <div class="kv"><span>Click lock</span><span>While you hold a click gesture the cursor stays still, so the click lands where you aimed.</span></div>
+            <div class="kv"><span>Privacy</span><span>Camera frames are processed on this computer only. Nothing is stored or sent.</span></div>
+            <div class="kv"><span>Turn it off</span><span>Close this window.</span></div>
+          </div>
+          <div class="page-actions"><button class="btn text" id="btn-setup">Run setup again</button></div>
+          <p id="mouse-note" class="muted hidden">This computer is not Windows, so the real mouse is not moved (preview only).</p>
+        </section>
+      </main>
+    </div>
 
     <div id="calibration" class="calibration hidden">
       <div id="cal-dot" class="cal-dot"><span id="cal-fill"></span></div>
       <p id="cal-msg" class="cal-msg"></p>
     </div>
 
-    <div id="error" class="error hidden"></div>
     <script type="module" src="/src/desktop/app.js"></script>
   </body>
 </html>

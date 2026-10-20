@@ -22,9 +22,11 @@ function toPhysical(x, y) {
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 440,
-    height: 760,
-    alwaysOnTop: true,
+    width: 1120,
+    height: 780,
+    minWidth: 860,
+    minHeight: 640,
+    backgroundColor: '#f3f5f9',
     title: 'Touch-free Control',
     autoHideMenuBar: true,
     webPreferences: {

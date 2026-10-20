@@ -119,3 +119,26 @@ the bridge answers, and the CPU fallback kicks in when WebGL is missing. A Windo
 - [ ] Click lock feels right: the cursor stops while I hold a wink and the click lands on the target.
 - [ ] Windows SmartScreen warning on the unsigned `.exe` (More info → Run anyway).
 - [ ] Read `electron/mouse.cjs`, `src/desktop/cursorGate.js` and `src/desktop/app.js` myself.
+
+## 2026-10-20 · Professional desktop design (v0.3.0)
+
+**Why:** The first desktop window looked cheap. I wanted it to feel like a finished product, like Google Project Gameface.
+I approved a screenshot draft before anything was pushed.
+
+**Tool:** Claude (Claude Code). Gameface was used as a visual reference only; no Gameface code or images were copied.
+
+**What changed (look only, the engine and gestures are the same):**
+- Sidebar navigation: Home, Camera & light, Head range, Click gestures (each with a done mark), Cursor & timing, Shortcuts & help, small live camera view
+- Top bar: status, Pause, and a Mouse control on/off switch
+- Home hero with a drawing and setup tiles; camera check shown as a light / distance / position checklist; gesture cards with icons
+- Settings as rows with a short explanation, − / + buttons and a small track; on/off switches for swap eyes and sounds
+- Inline SVG icons, Material-like colours, automatic dark mode, every button at least 64x64 px, reduced motion respected
+- Window 1120x780 (was a tall 440x760 always-on-top window)
+- Files: `desktop.html`, `src/desktop/desktop.css`, `src/desktop/app.js`, `electron/main.cjs`, README, 시작하기.md
+
+**Checked by AI:** `npm test` → 117 passed. `npm run build` passes. Headless Chromium with a fake camera: every page opens from the sidebar,
+"Finish setup" turns mouse control on, the switch and Pause work, settings are saved, light and dark screenshots look right.
+
+**Not checked (needs my Windows laptop):**
+- [ ] The new window size and layout on my real screen (and at 125 % / 150 % scaling)
+- [ ] The window is no longer always on top: check that minimising it while controlling the mouse feels fine

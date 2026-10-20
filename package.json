@@ -1,6 +1,6 @@
 {
   "name": "touch-free-control",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Touch-free computer control with a webcam (DA200 individual project)",

@@ -13,12 +13,13 @@ The browser cannot move the real mouse, so the app moves a virtual cursor inside
 Camera frames are processed on my device only. Nothing is stored or sent. The only network
 requests load the MediaPipe model and wasm files (pinned version 0.10.35).
 
-## Desktop app (v0.2.0): controls the real Windows mouse
+## Desktop app (v0.3.0): controls the real Windows mouse
 
 The same engine also runs as a Windows desktop app (Electron) that moves and clicks the **real** mouse,
 so it works in every program, not only inside my pages.
 
-- **Setup once (4 step cards):** camera and light check → 5-point head range → choose how to click and set its sensitivity with a live meter → ready. After that the app starts by itself.
+- **Layout:** a sidebar (Home, the three setup steps with done marks, Cursor & timing, Shortcuts & help, a small live camera view) and a top bar with the status, Pause and a Mouse control on/off switch. Light and dark mode follow Windows.
+- **Setup once (3 steps):** camera and light check (light, distance, position) → 5-point head range → choose how to click and set its sensitivity with a live meter. After that the app starts by itself.
 - **Click lock:** while a click gesture is being held, the cursor stays still, so the click lands where I aimed (opening the mouth or winking moves the face a little).
 - **Pause:** close both eyes for 2 s, or Ctrl+Alt+P (for a caregiver). **Re-center:** Ctrl+Alt+C.
 - The face model and MediaPipe wasm are bundled, so it starts without the internet; if missing it falls back to the CDN.
@@ -29,7 +30,7 @@ npm run desktop        # build and open the desktop app
 npm run desktop:dist   # make a portable Windows .exe in release/
 ```
 
-Credit: the step-card setup and per-gesture sensitivity meter were inspired by
+Credit: the sidebar layout, step-by-step setup and per-gesture sensitivity meter were inspired by
 [Google Project Gameface](https://github.com/google/project-gameface) (Apache-2.0). No Gameface code is included;
 the ideas were rebuilt in JavaScript.
 
