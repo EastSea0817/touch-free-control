@@ -27,27 +27,28 @@ what it ships**. These rules come from Parth Panchal's SFSU CS seminar (Oct 27, 
 
 ## Manual check (5 minutes, hands in lap)
 
-Open the web app in Chrome (`npm run dev`, or the GitHub Pages link) and tick each line:
+**Windows app (the main product)**, built with `npm run desktop` or the portable `.exe`:
 
-- [ ] The page loads and asks for the camera; "Camera on" shows.
-- [ ] Turning my head right moves the cursor right; looking up moves it up.
-- [ ] Calibration reaches all four corners.
-- [ ] A left wink held until the ring is full clicks the button under the cursor.
+- [ ] Setup: camera and light check turns green; 5-point head range reaches all four corners.
+- [ ] Turning my head right moves the real pointer right; looking up moves it up.
+- [ ] Mouse control on: the real pointer moves over the desktop and in other apps (Chrome, Notepad).
+- [ ] A left wink held until the ring is full clicks; a right wink right-clicks.
+- [ ] While a wink is held, the pointer stays still (click lock), so the click lands on the target.
 - [ ] Normal blinking and talking for 30 seconds cause **no** clicks.
-- [ ] Closing both eyes for 2 s pauses; a wink while paused does nothing; closing again resumes.
+- [ ] Closing both eyes for 2 s pauses (pointer stops, winks do nothing); Ctrl+Alt+P and Ctrl+Alt+C work.
+- [ ] Real task: open a website in Chrome and click a link or a video without hands.
+
+**Browser demo** (`npm run dev`, or the GitHub Pages link), additionally:
+
+- [ ] The page loads, asks for the camera, and "Camera on" shows.
 - [ ] "Delete my account" asks "Confirm?" and needs a *different* signal; waiting cancels it.
 - [ ] Settings → "Copy debug info" shows a report with no images or face numbers.
 - [ ] Privacy: DevTools → Network shows only the app files and the MediaPipe model/wasm, no uploads.
 
-Desktop app (Windows only), additionally:
-
-- [ ] The real mouse moves and clicks in another program (for example Notepad).
-- [ ] While a wink is held, the cursor stays still (click lock).
-- [ ] Ctrl+Alt+P pauses and Ctrl+Alt+C re-centres.
-
 ## When a tester reports a problem
 
-Ask them to open **Settings → Copy debug info** and paste the text into a
+In the browser demo, ask them to open **Settings → Copy debug info** and paste the text into a
 [GitHub issue](https://github.com/EastSea0817/touch-free-control/issues/new?template=bug_report.md) or a message.
 It shows the version, settings and the last events (clicks, pauses, errors), so I can understand the problem
-without being next to them.
+without being next to them. For the Windows app (no debug button yet), ask for a short screen recording
+and which settings they changed.

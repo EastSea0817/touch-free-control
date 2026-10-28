@@ -170,3 +170,20 @@ Copy debug info shows the report, the clipboard holds the same text, no page err
 - [ ] Read `src/core/debugLog.js` and the new lines in `src/main.js` (search for `debugLog`).
 - [ ] Add a real demo GIF to the README (hands in lap).
 - [ ] Decide which AI feature I present on Demo Day (`docs/beta-scope.md`).
+
+## 2026-10-28 · README and docs: the Windows app is the main product
+
+**Why:** I noticed the new README and Demo Day scope led with the browser version. My real product is the
+Windows app that moves the laptop's real mouse in every program; the browser version is only a no-install demo
+inside its own pages.
+
+**Tool:** Claude (Claude Code). Docs only, no code changed.
+
+**What changed:** `README.md` (headline, Try it, desktop section first), `docs/beta-scope.md` (beta sentence and
+core flow on the Windows app; scrolling, dragging, typing, debug button for the app on the later list),
+`docs/verification.md` (Windows app checklist first).
+
+**Checked by AI:** `npm test` passes; links and section anchors read correctly.
+
+**Still to do myself:**
+- [ ] Upload `TouchFreeControl-0.3.0-windows.zip` to a GitHub Release so the README download link works.
