@@ -20,9 +20,11 @@ import { createFormScreen } from './ui/screens/form.js';
 import { createSettingsScreen } from './ui/screens/settings.js';
 import { createRouter } from './ui/router.js';
 import { createReplayPlayer, createRecorder, parseRecording } from './dev/replay.js';
+import { createDebugLog, buildDebugReport } from './core/debugLog.js';
 
 const $ = (sel) => document.querySelector(sel);
 const DEV = new URLSearchParams(location.search).get('dev') === '1';
+const VERSION = typeof __APP_VERSION__ === 'undefined' ? 'dev' : __APP_VERSION__;
 const NO_FACE_MS = 2500;
 const SOURCE_NAMES = { face: 'a facial gesture', wink: 'a left wink', dwell: 'dwell (holding still)', hand: 'a fist', keyboard: 'the keyboard', mouse: 'the mouse' };
 
@@ -47,12 +49,15 @@ let busy = false;
 let dispatching = false;
 let lastFrame = null;
 let savedRange = profile.range;
+let noFaceShown = false;
 
 const video = $('#video');
 const feedback = createFeedback($('#toasts'));
 feedback.setMuted(!settings.sound);
 const cursor = createCursorOverlay($('#cursor'));
 const indicator = createDetectionIndicator($('#indicators'));
+// Short text events for "Copy debug info" (no images or face numbers).
+const debugLog = createDebugLog();
 
 // ---------- hit testing (which element is under the virtual cursor) ----------
 const keyOf = new WeakMap();
@@ -140,6 +145,7 @@ function availableSources() {
 
 function applyActions(actions) {
   for (const a of actions) {
+    debugLog.add(a.type, [a.state, a.source, a.button, a.reason, a.confirmed && 'confirmed'].filter(Boolean).join(' '));
     switch (a.type) {
       case 'click': {
         cursor.pulse();
@@ -231,6 +237,7 @@ document.addEventListener(
 
 // ---------- calibration ----------
 function startCalibration() {
+  debugLog.add('calibrationStart');
   calibration = createCalibration();
   calibrationCancel = createHoldDetector({ holdMs: 2000 });
   $('#calibration').classList.remove('hidden');
@@ -251,6 +258,7 @@ function renderCalibration(r) {
 }
 
 function endCalibration(message, kind) {
+  debugLog.add('calibrationEnd', message ?? '');
   calibration = null;
   $('#calibration').classList.add('hidden');
   cursor.show(true);
@@ -320,6 +328,10 @@ function loop(now) {
     }
     const noFace = cameraOn && !replay && now - lastFaceSeen > NO_FACE_MS;
     $('#noface').classList.toggle('hidden', !noFace);
+    if (noFace !== noFaceShown) {
+      noFaceShown = noFace;
+      debugLog.add(noFace ? 'faceLost' : 'faceFound');
+    }
   } finally {
     busy = false;
   }
@@ -485,6 +497,7 @@ const app = {
     return settings;
   },
   updateSettings(patch) {
+    if (Object.keys(patch).length) debugLog.add('settings', Object.entries(patch).map(([k, v]) => `${k}=${v}`).join(' '));
     settings = { ...settings, ...patch };
     engine.configure(settings);
     feedback.setMuted(!settings.sound);
@@ -519,6 +532,27 @@ const app = {
     engine.setRange(null);
     app.updateSettings({});
     feedback.toast('My profile was reset to the defaults.');
+  },
+  toast(text) {
+    feedback.toast(text, { ms: 3000 });
+  },
+  debugReport() {
+    return buildDebugReport({
+      version: VERSION,
+      settings,
+      status: {
+        state: engine.controller.state,
+        camera: cameraOn ? 'on' : 'off',
+        faceModel: tracker ? 'loaded' : 'not loaded',
+        handModel: handTracker ? 'loaded' : 'not loaded',
+        faceSeen: noFaceShown ? 'no' : 'yes',
+        calibrated: savedRange ? 'yes' : 'no',
+        onboarded: onboarded ? 'yes' : 'no',
+        screen: router.current,
+      },
+      env: { userAgent: navigator.userAgent, screen: `${innerWidth}x${innerHeight} @${devicePixelRatio}x` },
+      events: debugLog.events,
+    });
   },
 };
 
@@ -571,6 +605,7 @@ const ERRORS = {
 };
 
 function showError(code) {
+  debugLog.add('error', code);
   const [title, text] = ERRORS[code] ?? ERRORS.generic;
   $('#error-title').textContent = title;
   $('#error-text').textContent = text;
@@ -588,10 +623,12 @@ $('#error-retry').addEventListener('click', () => location.reload());
 
 addEventListener('error', (e) => {
   console.error(e.error || e.message);
+  debugLog.add('jsError', e.message);
   if (!started) showError('generic');
 });
 addEventListener('unhandledrejection', (e) => {
   console.error(e.reason);
+  debugLog.add('jsError', e.reason?.message ?? e.reason);
   if (!started) showError('generic');
 });
 
@@ -613,6 +650,7 @@ async function main() {
     await startCamera(video);
     $('#camera-status').className = 'chip chip-on';
     $('#camera-status .label').textContent = 'Camera on';
+    debugLog.add('cameraOn');
   } catch (err) {
     showError(err.code || 'camera');
     return;
@@ -620,6 +658,7 @@ async function main() {
   try {
     $('#loading-text').textContent = 'Loading the face model…';
     tracker = await createFaceTracker();
+    debugLog.add('faceModelLoaded');
   } catch {
     showError('model');
     return;

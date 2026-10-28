@@ -248,6 +248,7 @@ h2 { font-size: 1.35rem; margin: 0 0 8px; }
 .setting-row .value { min-width: 110px; text-align: center; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
 .setting-row .btn { min-width: 72px; font-size: 1.4rem; }
 .setting-row .btn-wide { min-width: 140px; font-size: 1rem; }
+.debug-report { width: 100%; margin-top: 16px; padding: 12px; font: 0.9rem/1.4 ui-monospace, monospace; color: var(--text); background: var(--surface); border: 2px solid var(--border); border-radius: 12px; }
 .scroll-buttons { position: fixed; right: 16px; top: 50%; transform: translateY(-110%); z-index: 16; display: grid; gap: 24px; }
 .scroll-buttons .btn { min-width: 120px; min-height: 72px; box-shadow: var(--shadow); }
 .scroll-buttons .btn:disabled { opacity: 0.35; }

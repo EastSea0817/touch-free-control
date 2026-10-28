@@ -1,11 +1,16 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'));
 
 // GitHub Pages serves the app from /<repo-name>/. Set VITE_BASE in the deploy
 // workflow (or leave "./" so the build also works from any folder, and from
 // the desktop app's file:// pages).
 export default defineConfig({
   base: process.env.VITE_BASE || './',
+  // shown in "Copy debug info"
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   build: {
     rollupOptions: {
       // web prototype + desktop app control panel
