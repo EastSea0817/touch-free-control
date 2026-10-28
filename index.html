@@ -136,6 +136,15 @@
           <button class="btn btn-big" id="settings-calibrate">Calibrate again</button>
           <button class="btn btn-big btn-danger" id="settings-reset" data-risk="high">Reset my profile</button>
         </div>
+        <h2>Something not working?</h2>
+        <p class="hint">
+          "Copy debug info" makes a short text report (version, settings, the last clicks and errors) that you can
+          paste into a GitHub issue or a message. It never includes camera images or face data.
+        </p>
+        <div class="row">
+          <button class="btn btn-big" id="settings-debug">Copy debug info</button>
+        </div>
+        <textarea class="debug-report hidden" id="debug-report" readonly rows="10" aria-label="Debug info"></textarea>
       </section>
     </main>
 

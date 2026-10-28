@@ -60,5 +60,20 @@ export function createSettingsScreen({ root, app }) {
     render();
   });
 
+  // Clipboard access can be refused (for example for clicks made with the
+  // virtual cursor), so the report is also shown in a box to copy by hand.
+  const report = root.querySelector('#debug-report');
+  root.querySelector('#settings-debug').addEventListener('click', async () => {
+    report.value = app.debugReport();
+    report.classList.remove('hidden');
+    try {
+      await navigator.clipboard.writeText(report.value);
+      app.toast('Debug info copied. Paste it into a message or a GitHub issue.');
+    } catch {
+      report.select();
+      app.toast('Select the text in the box below and copy it.');
+    }
+  });
+
   return { render };
 }

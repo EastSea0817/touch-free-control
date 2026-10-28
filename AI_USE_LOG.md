@@ -142,3 +142,31 @@ I approved a screenshot draft before anything was pushed.
 **Not checked (needs my Windows laptop):**
 - [ ] The new window size and layout on my real screen (and at 125 % / 150 % scaling)
 - [ ] The window is no longer always on top: check that minimising it while controlling the mouse feels fine
+
+## 2026-10-28 · Lessons from Parth Panchal's SFSU seminar (debug info, docs, checks)
+
+**Why:** After the CS seminar "From Open Source to AI-Powered Software Development" (Oct 27) I applied its advice:
+a README people understand at first glance, verification as my job, explaining the system flow, logs for
+problems I can't see in person, a narrow Demo Day scope, and an easy start for first contributors.
+
+**Tool:** Claude (Claude Code).
+
+**What changed:**
+- New `src/core/debugLog.js` (pure) + Settings → **Copy debug info**: version, settings and the last 60 text events
+  (clicks, pauses, confirmations, face lost/found, errors, settings changes). No images, landmarks or expression scores.
+  Files: `src/main.js`, `src/ui/screens/settings.js`, `index.html`, `src/styles.css`, `vite.config.js` (app version).
+- README rewritten (what it is, who it is for, how to try, how it works, bug reports, contributing, verification).
+- New docs: `docs/how-it-works.md` (system diagram + "where to look" table), `docs/verification.md`, `docs/beta-scope.md`, `CONTRIBUTING.md`.
+- GitHub: tests run on every pull request (`.github/workflows/test.yml`), issue templates, pull request checklist.
+- `.gitignore` now blocks `.env`, `*.pem`, `*.key` so secrets can't be committed by mistake.
+
+**Checked by AI:** `npm test` → 122 passed (5 new debug log tests, including "face data is never included").
+`npm run build` passes and the build shows version 0.3.0. Headless Chromium with a fake camera: Settings →
+Copy debug info shows the report, the clipboard holds the same text, no page errors.
+
+**Not checked (I need to do this myself):**
+- [ ] Press "Copy debug info" with a wink (virtual cursor). The browser may refuse the clipboard for that click;
+      then the text box below is selected so I can copy it by hand.
+- [ ] Read `src/core/debugLog.js` and the new lines in `src/main.js` (search for `debugLog`).
+- [ ] Add a real demo GIF to the README (hands in lap).
+- [ ] Decide which AI feature I present on Demo Day (`docs/beta-scope.md`).

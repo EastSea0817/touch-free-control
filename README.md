@@ -1,7 +1,55 @@
-# Touch-free Control (DA200 individual project, Fall 2026)
+# Touch-free Control
 
-I am building a web app that lets people with motor impairments control a computer
-without touching a mouse, keyboard or touchpad, using only a normal webcam.
+**Control a computer with your head and a wink. No mouse, no keyboard, just a webcam.**
+
+A free, open-source (Apache-2.0) tool for people who can't easily use their hands, for example after a spinal cord
+injury, with ALS or with a strong tremor. I am building it as my individual project for DA200 (Fall 2026).
+
+<!-- Demo GIF: record a 10-second screen capture (hands in lap) and save it as docs/images/demo.gif, then show it here:
+![Touch-free Control demo](docs/images/demo.gif) -->
+
+| | How |
+| --- | --- |
+| 🖱️ **Move** | Turn your head. The cursor follows. |
+| 👉 **Click** | Wink and hold for 1.5 s (left eye = click, right eye = right click). Normal blinks never click. |
+| ⏸️ **Pause** | Close both eyes for 2 s. Nothing is clicked while paused. Do it again to resume. |
+| 🛡️ **Safety** | Risky buttons ask "Confirm?" and need a second, *different* signal. |
+| 🔒 **Privacy** | Camera frames are processed on your device only. Nothing is stored or sent. |
+
+**Try it:** [web version](https://eastsea0817.github.io/touch-free-control/) (Chrome + webcam) ·
+Windows desktop app that moves the real mouse: see [below](#desktop-app-v030-controls-the-real-windows-mouse).
+
+**Status:** student beta. What the beta must do, and what waits for later: [docs/beta-scope.md](docs/beta-scope.md).
+
+## How it works
+
+```
+webcam → face model (MediaPipe, on device) → head pose → my head range → smoothing → cursor
+                                           → wink / eyes-closed detection → input controller → click · pause · confirm
+```
+
+The full picture, with the file for each step and where to look when something breaks:
+[docs/how-it-works.md](docs/how-it-works.md).
+
+## Something not working?
+
+In the app, open **Settings → Copy debug info** and paste the text into a
+[bug report](https://github.com/EastSea0817/touch-free-control/issues/new?template=bug_report.md).
+It lists the version, settings and the last clicks, pauses and errors. It never includes camera images or face data.
+
+## Want to help?
+
+Start with an issue labelled
+[good first issue](https://github.com/EastSea0817/touch-free-control/labels/good%20first%20issue) and read
+[CONTRIBUTING.md](CONTRIBUTING.md). Trying the app with your hands in your lap and telling me what was hard helps too.
+
+## How I check AI-written code
+
+Most of this code was written with an AI coding assistant, and I am responsible for it. Every change is small,
+tested (`npm test`, also on GitHub for every pull request), run by me by hand, and logged in
+[AI_USE_LOG.md](AI_USE_LOG.md). The checklist: [docs/verification.md](docs/verification.md).
+
+## All features (web version)
 
 - **Move the cursor** by turning my head.
 - **Click** by winking (left eye = click, right eye = right click, held 1.5 s), or by opening my mouth / raising my eyebrows, or by holding the cursor still on a target (dwell).
@@ -9,9 +57,8 @@ without touching a mouse, keyboard or touchpad, using only a normal webcam.
 - **Hand gestures** (optional, off by default): make a fist to click, hold an open palm for 1.5 s to pause.
 - **Risky buttons** (marked `data-risk="high"`) ask "Confirm?" and need a second, *different* signal. A timeout cancels.
 
-The browser cannot move the real mouse, so the app moves a virtual cursor inside its own pages.
-Camera frames are processed on my device only. Nothing is stored or sent. The only network
-requests load the MediaPipe model and wasm files (pinned version 0.10.35).
+The browser cannot move the real mouse, so the web app moves a virtual cursor inside its own pages.
+The only network requests load the MediaPipe model and wasm files.
 
 ## Desktop app (v0.3.0): controls the real Windows mouse
 
@@ -64,7 +111,7 @@ Open `http://localhost:5173/?dev=1`:
 ```
 src/vision/   MediaPipe only (camera, face tracker, hand tracker)
 src/input/    head pointer, smoothing, dwell, face click trigger, hand gestures, calibration (pure)
-src/core/     settings, input controller (ACTIVE/PAUSED/CONFIRMING), input engine (pure)
+src/core/     settings, input controller (ACTIVE/PAUSED/CONFIRMING), input engine, debug log (pure)
 src/data/     profile store (localStorage)
 src/desktop/  desktop app page: click lock, environment check, gesture meters
 electron/     desktop shell: window, real mouse (user32 via koffi), shortcuts
@@ -75,7 +122,7 @@ tests/        Vitest tests + fixtures
 
 ## Publish with GitHub Pages
 
-1. Create a new GitHub repository and push this folder to the `main` branch.
+1. Push to the `main` branch.
 2. In the repository: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 3. The workflow in `.github/workflows/deploy.yml` runs the tests, builds, and deploys.
 4. The link appears in **Actions → the latest run → deploy**, like `https://<user>.github.io/<repo>/`.

@@ -3,3 +3,8 @@ dist
 .DS_Store
 release/
 public/mediapipe/
+# secrets never go into Git (see docs/verification.md)
+.env
+.env.*
+*.pem
+*.key
