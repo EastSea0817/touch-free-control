@@ -24,7 +24,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1120,
     height: 780,
-    minWidth: 860,
+    minWidth: 760,
     minHeight: 640,
     backgroundColor: '#f3f5f9',
     title: 'Touch-free Control',

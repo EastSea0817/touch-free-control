@@ -187,3 +187,28 @@ core flow on the Windows app; scrolling, dragging, typing, debug button for the 
 
 **Still to do myself:**
 - [ ] Upload `TouchFreeControl-0.3.0-windows.zip` to a GitHub Release so the README download link works.
+
+## 2026-10-30 · Lesson 17 style guide applied to the desktop app
+
+**Why:** In the DA200 Lesson 17 visual design workshops I chose a "Warm & Friendly" theme, the "Lavender + Butter"
+palette, the Lexend font and an icon rail for small windows. The real app should match the style guide.
+
+**Tool:** Claude (Claude Code). I made each choice (theme, palette, font, small-window menu); Claude drafted the options
+and checked contrast.
+
+**What changed (look only, the engine and gestures are the same):**
+- Colour tokens in light and dark mode: lavender `#6d4fc2` primary, warm cream background `#fbf8f3`, butter `#ffd98e`
+  for AI highlights, "Paused" moved from purple to steel blue `#2f6f8f` so it is not confused with the primary colour.
+  All text pairs pass WCAG 4.5:1.
+- Lexend font bundled in the app (`src/desktop/fonts/`, SIL Open Font License), so it works offline. Body text is 16 px.
+- Type scale: H1 30/38, page title 24/32, labels 13 px.
+- Window narrower than 900 px: the sidebar becomes a 104 px icon rail so every page stays one click away.
+  Minimum window width 860 → 760 px.
+- Files: `src/desktop/desktop.css`, `src/desktop/fonts/`, `desktop.html` (logo colour), `electron/main.cjs` (min width)
+
+**Checked by AI:** `npm test` → 122 passed. `npm run build` passes and bundles the font. Headless Chromium: light, dark and a
+780 px wide window look right, and Lexend loads from the app files.
+
+**Not checked (needs my Windows laptop):**
+- [ ] Lexend on Windows at 125 % / 150 % scaling
+- [ ] Make the window narrow and check the icon rail with the head pointer
