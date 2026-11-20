@@ -18,7 +18,7 @@ injury, with ALS or with a strong tremor. I am building it as my individual proj
 
 ## Try it
 
-- **Windows app (the real tool):** download `TouchFreeControl-0.3.0-windows.zip` from
+- **Windows app (the real tool):** download `Nohands-0.4.0-windows.zip` from
   [Releases](https://github.com/EastSea0817/touch-free-control/releases), unzip it and run the `.exe`
   (Windows may warn about an unknown app: More info → Run anyway). Or build it yourself (see below).
 - **Browser demo (no install):** [eastsea0817.github.io/touch-free-control](https://eastsea0817.github.io/touch-free-control/)
@@ -37,7 +37,7 @@ webcam → face model (MediaPipe, on device) → head pose → my head range →
 The full picture, with the file for each step and where to look when something breaks:
 [docs/how-it-works.md](docs/how-it-works.md).
 
-## Desktop app (v0.3.0): controls the real Windows mouse
+## Desktop app (v0.4.0): controls the real Windows mouse
 
 The main app. It runs on Windows (Electron) and moves and clicks the **real** mouse, so it works in every program:
 the browser, Word, YouTube, games.
@@ -46,6 +46,7 @@ the browser, Word, YouTube, games.
 - **Setup once (3 steps):** camera and light check (light, distance, position) → 5-point head range → choose how to click and set its sensitivity with a live meter. After that the app starts by itself.
 - **Click lock:** while a click gesture is being held, the cursor stays still, so the click lands where I aimed (opening the mouth or winking moves the face a little).
 - **Pause:** close both eyes for 2 s, or Ctrl+Alt+P (for a caregiver). **Re-center:** Ctrl+Alt+C.
+- **My insights (opt-in):** the four types of data analytics on this computer only. *Descriptive:* clicks that were right, wrong clicks per 10 min, minutes used. *Diagnostic:* compares wrong clicks in dark rooms, with backlight, after 20 minutes, mouth vs wink. *Predictive:* a small decision tree rates the current session Low / Medium / High risk after 2 minutes. *Prescriptive:* suggestions with an Apply button, so nothing changes until I approve it. Mark a wrong click with Ctrl+Alt+W. Export CSV for Pandas. Only numbers are kept, never camera images or face data, and they can be deleted.
 - The face model and MediaPipe wasm are bundled, so it starts without the internet; if missing it falls back to the CDN.
 
 ```bash

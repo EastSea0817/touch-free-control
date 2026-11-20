@@ -80,6 +80,7 @@ app.whenReady().then(() => {
   // Keyboard shortcuts for a caregiver: pause/resume and re-center.
   globalShortcut.register('CommandOrControl+Alt+P', () => win?.webContents.send('shortcut', 'togglePause'));
   globalShortcut.register('CommandOrControl+Alt+C', () => win?.webContents.send('shortcut', 'recenter'));
+  globalShortcut.register('CommandOrControl+Alt+W', () => win?.webContents.send('shortcut', 'wrongClick'));
 
   createWindow();
 });
