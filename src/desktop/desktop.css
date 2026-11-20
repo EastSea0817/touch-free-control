@@ -275,3 +275,25 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* ---------- My insights (four types of analytics) ---------- */
+.ins-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.ins-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); min-height: 150px; }
+.ins-tag { font-size: 13px; font-weight: 650; letter-spacing: .02em; color: var(--accent); margin-bottom: 10px; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kpi b { display: block; font-size: 24px; line-height: 1.2; }
+.kpi small { color: var(--muted); font-size: 13px; }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 70px; margin-top: 14px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+.bar-col .ok { background: var(--accent); }
+.bar-col .bad { background: var(--warn); }
+.ins-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ins-list li { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.ins-list small { display: block; color: var(--muted); font-size: 13px; }
+.risk { display: flex; gap: 14px; align-items: center; }
+.risk-badge { padding: 6px 14px; border-radius: 999px; font-weight: 700; background: var(--surface-2); }
+.risk-badge[data-level='low'] { background: var(--ok-soft); color: var(--ok); }
+.risk-badge[data-level='medium'] { background: var(--warn-soft); color: var(--warn); }
+.risk-badge[data-level='high'] { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--danger); }
+#insights-body.off { opacity: .55; }
+@media (max-width: 900px) { .ins-grid { grid-template-columns: 1fr; } }

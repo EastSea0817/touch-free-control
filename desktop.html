@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:" />
-    <title>Touch-free Control</title>
+    <title>Nohands</title>
     <link rel="stylesheet" href="/src/desktop/desktop.css" />
   </head>
   <body>
@@ -15,6 +15,7 @@
       <symbol id="i-click" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 1 6 6v6a6 6 0 0 1-12 0V9a6 6 0 0 1 6-6z" fill="none" stroke="currentColor" stroke-width="2" /><path d="M12 3v7" stroke="currentColor" stroke-width="2" /><path d="M6.2 9.5H12V3.1A6 6 0 0 0 6.2 9.5z" /></symbol>
       <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M12 2.5 15 6h-2v4.9h-2V6H9zM12 21.5 9 18h2v-4.9h2V18h2zM2.5 12 6 9v2h4.9v2H6v2zM21.5 12 18 15v-2h-4.9v-2H18V9z" /></symbol>
       <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" /><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2.9-1.2 1.8v.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /><circle cx="12" cy="17" r="1.2" /></symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" /><rect x="5.5" y="11" width="3" height="7" rx="1" /><rect x="10.5" y="6" width="3" height="12" rx="1" /><rect x="15.5" y="9" width="3" height="9" rx="1" /></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" /></symbol>
       <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /></symbol>
       <symbol id="i-light" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></symbol>
@@ -35,7 +36,7 @@
             <path d="M13.5 24c3.6 3.6 9.4 3.6 13 0" stroke="var(--accent-text)" stroke-width="2.6" fill="none" stroke-linecap="round" />
           </svg>
           <div>
-            <div class="brand-name">Touch-free Control</div>
+            <div class="brand-name">Nohands</div>
             <div class="brand-sub">Head &amp; face mouse</div>
           </div>
         </div>
@@ -48,6 +49,7 @@
           <button data-page="click"><svg><use href="#i-click" /></svg><span>Click gestures</span><i class="step-mark" data-for="click"></i></button>
           <div class="nav-label">Settings</div>
           <button data-page="cursor"><svg><use href="#i-cursor" /></svg><span>Cursor &amp; timing</span></button>
+          <button data-page="insights"><svg><use href="#i-chart" /></svg><span>My insights</span></button>
           <button data-page="help"><svg><use href="#i-help" /></svg><span>Shortcuts &amp; help</span></button>
         </nav>
 
@@ -200,6 +202,45 @@
           </div>
         </section>
 
+        <!-- Insights (DA200 Lesson 23: four types of analytics, on this computer only) -->
+        <section class="page" data-page="insights">
+          <header class="page-head">
+            <h2>My insights</h2>
+            <p>How well Nohands works for you, why clicks go wrong, and what to change. Only numbers are kept, on this computer.</p>
+          </header>
+          <div class="panel">
+            <div class="set-row"><div class="set-text"><b>Keep usage numbers on this computer</b><small>Clicks, wrong clicks, light and tracking. Never camera images or face data. Off until you turn it on.</small></div>
+              <button class="switch" id="stats-optin" role="switch" aria-checked="false" aria-label="Keep usage numbers"><span></span></button></div>
+          </div>
+          <div id="insights-body">
+            <div class="ins-grid">
+              <article class="ins-card" data-kind="descriptive">
+                <div class="ins-tag">Descriptive · What happened?</div>
+                <div class="kpis" id="ins-kpis"></div>
+                <div class="bars" id="ins-bars" aria-label="Clicks in the last sessions"></div>
+              </article>
+              <article class="ins-card" data-kind="diagnostic">
+                <div class="ins-tag">Diagnostic · Why?</div>
+                <ul class="ins-list" id="ins-why"></ul>
+              </article>
+              <article class="ins-card" data-kind="predictive">
+                <div class="ins-tag">Predictive · This session</div>
+                <div class="risk" id="ins-risk"></div>
+              </article>
+              <article class="ins-card" data-kind="prescriptive">
+                <div class="ins-tag">Prescriptive · What to do</div>
+                <ul class="ins-list" id="ins-todo"></ul>
+              </article>
+            </div>
+            <div class="page-actions">
+              <button class="btn tonal" id="btn-wrong">Last click was wrong</button>
+              <button class="btn text" id="btn-export">Export CSV</button>
+              <button class="btn text" id="btn-clear-stats">Delete my numbers</button>
+            </div>
+            <p class="muted">Tip: press <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>W</kbd> right after a wrong click. That is how Nohands learns which clicks went wrong.</p>
+          </div>
+        </section>
+
         <!-- Help -->
         <section class="page" data-page="help">
           <header class="page-head">
@@ -210,7 +251,8 @@
             <div class="kv"><span>Pause or resume</span><span>Close both eyes for 2 s &nbsp;·&nbsp; <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>P</kbd></span></div>
             <div class="kv"><span>Re-center the cursor</span><span>Re-center button on the Cursor page &nbsp;·&nbsp; <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>C</kbd></span></div>
             <div class="kv"><span>Click lock</span><span>While you hold a click gesture the cursor stays still, so the click lands where you aimed.</span></div>
-            <div class="kv"><span>Privacy</span><span>Camera frames are processed on this computer only. Nothing is stored or sent.</span></div>
+            <div class="kv"><span>Privacy</span><span>Camera frames are processed on this computer only and never stored or sent. Usage numbers are kept only if you turn them on in My insights.</span></div>
+            <div class="kv"><span>Mark a wrong click</span><span>My insights page &nbsp;·&nbsp; <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>W</kbd></span></div>
             <div class="kv"><span>Turn it off</span><span>Close this window.</span></div>
           </div>
           <div class="page-actions"><button class="btn text" id="btn-setup">Run setup again</button></div>

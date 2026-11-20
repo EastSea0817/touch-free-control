@@ -15,6 +15,8 @@ import { createFeedback } from '../ui/feedback.js';
 import { createCursorGate } from './cursorGate.js';
 import { checkEnvironment, faceBox, averageBrightness } from './envCheck.js';
 import { gestureMeters, stepSensitivity, clickIntent, GESTURE_HELP } from './meters.js';
+import { createSessionRecorder, addSession, describeSessions, diagnose, predictRisk, prescribe, sessionsCsv, clicksCsv } from '../core/usageStats.js';
+import { loadStats, saveStats, clearStats } from '../data/statsStore.js';
 
 const $ = (s) => document.querySelector(s);
 const desktop = window.desktop ?? null; // null when opened in a normal browser (tests)
@@ -54,6 +56,24 @@ function save() {
   saveProfile({ settings, range, onboarded });
 }
 
+// ---------- usage insights (opt-in, numbers only, this computer only) ----------
+let stats = loadStats();
+let recorder = null;
+
+function startRecording() {
+  if (stats.optIn && !recorder) recorder = createSessionRecorder({ gesture: settings.faceClickGesture, settings });
+}
+
+function stopRecording() {
+  if (!recorder) return;
+  stats.sessions = addSession(stats.sessions, recorder.finish());
+  recorder = null;
+  saveStats(stats);
+}
+
+// keep what was recorded if the window is closed while controlling
+window.addEventListener('beforeunload', () => stopRecording());
+
 // ---------- startup ----------
 async function boot() {
   bindNav();
@@ -66,6 +86,7 @@ async function boot() {
       if (!engine) return;
       if (name === 'togglePause') apply(engine.signal('togglePause', performance.now(), 'keyboard'));
       if (name === 'recenter') recenter();
+      if (name === 'wrongClick') markWrongClick();
     });
   }
   try {
@@ -124,6 +145,7 @@ function loop() {
     const paused = r.state === STATE.PAUSED;
     const intent = clickIntent(face?.blendshapes ?? null, settings, r.progress.face) ? 1 : 0;
     const g = gate.update(r.cursor, intent, paused);
+    recorder?.frame({ face: !!face, cursor: r.cursor });
     if (g.move && desktop) desktop.moveMouse(g.move.x + screenInfo.x, g.move.y + screenInfo.y);
     apply(r.actions, g.clickAt);
   } else {
@@ -137,10 +159,12 @@ function apply(actions, clickAt = null) {
       const p = clickAt ?? engine.cursor;
       desktop?.click(a.button === 'right' ? 'right' : 'left', p.x + screenInfo.x, p.y + screenInfo.y);
       feedback.beep(a.button === 'right' ? 'right' : 'click');
+      recorder?.click();
     } else if (a.type === 'state') {
       renderStatus();
     } else if (a.type === 'paused') {
       feedback.beep('pause');
+      recorder?.pause();
       flash('Paused. Nothing will be clicked and the cursor stays still.');
     } else if (a.type === 'resumed') {
       feedback.beep('resume');
@@ -196,6 +220,8 @@ function renderStepMarks() {
 function setControl(on) {
   controlling = on;
   gate.reset();
+  if (on) startRecording();
+  else stopRecording();
   if (on) {
     feedback.unlockAudio();
     onboarded = true;
@@ -212,6 +238,7 @@ function go(name) {
   if (name === 'camera') $('#next-camera').disabled = !envOk;
   if (name === 'range') $('#range-status').textContent = range ? 'I have a saved range. Start again to replace it.' : '';
   if (name === 'click') renderGestureChoice();
+  if (name === 'insights') renderInsights();
   $('.main').scrollTop = 0;
 }
 
@@ -250,6 +277,10 @@ function updateEnvironment(face) {
   const box = face ? faceBox(face.landmarks) : null;
   const env = checkEnvironment({ brightness, face: box });
   envOk = env.ok;
+  if (recorder) {
+    const code = (list) => env.hints.find((h) => list.includes(h.code))?.code;
+    recorder.env({ light: code(['dark', 'bright']) ?? 'ok', distance: code(['far', 'near']) ?? 'ok' });
+  }
   if (env.ok && !cameraChecked) {
     cameraChecked = true;
     renderStepMarks();
@@ -416,6 +447,21 @@ function bindUi() {
   $('#btn-pause').onclick = () => apply(engine.signal('togglePause', performance.now(), 'mouse'));
   $('#btn-recenter').onclick = () => recenter();
   $('#btn-setup').onclick = () => go('camera');
+  $('#stats-optin').onclick = () => setOptIn(!stats.optIn);
+  $('#btn-wrong').onclick = () => markWrongClick();
+  $('#btn-export').onclick = () => exportCsv();
+  $('#btn-clear-stats').onclick = () => {
+    stopRecording();
+    stats = { optIn: stats.optIn, sessions: [] };
+    clearStats();
+    saveStats(stats);
+    startRecordingIfControlling();
+    renderInsights();
+    flash('Your usage numbers were deleted.');
+  };
+  setInterval(() => {
+    if (page === 'insights') renderInsights();
+  }, 2000);
 
   document.addEventListener('click', (e) => {
     const g = e.target.closest('[data-g]');
@@ -443,6 +489,104 @@ function bindUi() {
       e.target.closest('.switch').setAttribute('aria-checked', String(!!settings[t.key]));
     }
   });
+}
+
+// ---------- My insights page (Lesson 23: descriptive, diagnostic, predictive, prescriptive) ----------
+function startRecordingIfControlling() {
+  if (controlling) startRecording();
+}
+
+function setOptIn(on) {
+  stats.optIn = on;
+  if (on) startRecordingIfControlling();
+  else stopRecording();
+  saveStats(stats);
+  renderInsights();
+}
+
+function markWrongClick() {
+  if (!recorder) return flash(stats.optIn ? 'Start mouse control first.' : 'Turn on "Keep usage numbers" in My insights first.');
+  flash(recorder.markWrong() ? 'Thanks. I noted that the last click was wrong.' : 'There was no click in the last 15 seconds.');
+  if (page === 'insights') renderInsights();
+}
+
+function esc(t) {
+  return String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+}
+
+function renderInsights() {
+  $('#stats-optin').setAttribute('aria-checked', String(stats.optIn));
+  $('#insights-body').classList.toggle('off', !stats.optIn);
+  // include the running session so the numbers move while you use the app
+  const live = recorder ? { ...recorder.session, clicks: recorder.session.clicks.slice() } : null;
+  const sessions = live ? [...stats.sessions, live] : stats.sessions;
+
+  // 1. Descriptive
+  const d = describeSessions(sessions);
+  const kpi = (v, label) => `<div class="kpi"><b>${v}</b><small>${label}</small></div>`;
+  $('#ins-kpis').innerHTML =
+    kpi(d.successRate === null ? '–' : `${d.successRate}%`, 'clicks that were right') +
+    kpi(d.wrongPer10, 'wrong clicks / 10 min') +
+    kpi(d.minutes, `minutes in ${d.sessions} session${d.sessions === 1 ? '' : 's'}`);
+  const max = Math.max(1, ...d.recent.map((r) => r.clicks));
+  $('#ins-bars').innerHTML = d.recent.length
+    ? d.recent
+        .map((r) => {
+          const ok = ((r.clicks - r.wrong) / max) * 100;
+          const bad = (r.wrong / max) * 100;
+          return `<div class="bar-col" title="${r.clicks} clicks, ${r.wrong} wrong, ${r.minutes} min"><div class="bad" style="height:${bad}%"></div><div class="ok" style="height:${ok}%"></div></div>`;
+        })
+        .join('')
+    : '<p class="muted">No sessions yet.</p>';
+
+  // 2. Diagnostic
+  const dx = diagnose(sessions);
+  $('#ins-why').innerHTML = dx.findings.length
+    ? dx.findings.map((f) => `<li><span>${esc(f.text)}<small>${f.wrongRate}% wrong vs ${f.baseRate}% otherwise</small></span></li>`).join('')
+    : `<li><span>${dx.enough ? 'Nothing stands out. Clicks go wrong about equally everywhere.' : 'Need more clicks to compare situations.'}<small>Based on ${dx.clicksUsed} clicks.</small></span></li>`;
+
+  // 3. Predictive
+  const risk = predictRisk(live);
+  const label = { low: 'Low risk', medium: 'Medium risk', high: 'High risk' }[risk.level] ?? 'Waiting';
+  $('#ins-risk').innerHTML = live
+    ? `<span class="risk-badge" data-level="${risk.level ?? ''}">${label}</span><span>${esc(risk.reason)}</span>`
+    : '<span class="muted">Start mouse control to see how this session is going.</span>';
+
+  // 4. Prescriptive (the user approves every change)
+  const todo = prescribe({ summary: d, findings: dx.findings, risk, settings, current: live });
+  $('#ins-todo').innerHTML = todo.length
+    ? todo
+        .map(
+          (t, i) => `<li><span>${esc(t.text)}<small>${esc(t.why)}</small></span>${
+            t.patch ? `<button class="btn tonal" data-apply="${i}">Apply</button>` : t.go ? `<button class="btn text" data-go="${t.go}">Open</button>` : ''
+          }</li>`,
+        )
+        .join('')
+    : '<li><span>No changes needed right now.</span></li>';
+  $('#ins-todo').onclick = (e) => {
+    const b = e.target.closest('[data-apply]');
+    if (!b) return;
+    const t = todo[Number(b.dataset.apply)];
+    setSettings(t.patch);
+    renderSettings();
+    renderGestureChoice();
+    flash(`Applied: ${t.text}`);
+    renderInsights();
+  };
+}
+
+function exportCsv() {
+  const all = recorder ? [...stats.sessions, recorder.session] : stats.sessions;
+  for (const [name, text] of [
+    ['nohands-sessions.csv', sessionsCsv(all)],
+    ['nohands-clicks.csv', clicksCsv(all)],
+  ]) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
 }
 
 boot();

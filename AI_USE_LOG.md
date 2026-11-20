@@ -212,3 +212,25 @@ and checked contrast.
 **Not checked (needs my Windows laptop):**
 - [ ] Lexend on Windows at 125 % / 150 % scaling
 - [ ] Make the window narrow and check the icon rail with the head pointer
+
+
+## 2026-11-19 · My insights: four types of data analytics (DA200 Lesson 23)
+
+Goal: turn my Lesson 23 analytics plan into a real feature, on the user's own computer.
+
+- `src/core/usageStats.js` (pure, tested): session recorder + `describeSessions` (descriptive), `diagnose` (diagnostic:
+  wrong-click rate in dark / backlit / after 20 min / mouth vs wink, only when each group has 5+ clicks),
+  `predictRisk` (predictive: hand-written decision tree on the first 2 minutes, so every answer has a reason),
+  `prescribe` (prescriptive: suggestions with a settings patch; the app applies it only when the user presses Apply).
+- `src/data/statsStore.js`: separate localStorage key `nohands.stats.v1`, opt-in, max 30 sessions (queue), delete button.
+- Desktop: "My insights" page, "Last click was wrong" button + Ctrl+Alt+W shortcut, CSV export
+  (`nohands-sessions.csv`, `nohands-clicks.csv`) for Pandas / Excel. Visible app name is now **Nohands**.
+  The Windows build name and app id are unchanged on purpose: changing them would move the saved profile.
+
+**Checked by AI:** `npm test` → 140 passed (18 new). `vite build` passes. Headless Chromium with sample data: the page
+looks right in light and dark mode.
+
+**Not checked (needs my Windows laptop):**
+- [ ] A real 5-minute session fills the numbers, and Ctrl+Alt+W marks the last click
+- [ ] Export CSV opens a save dialog in the Electron app
+- [ ] Thresholds in the decision tree (4 tracking losses, 2 wrong clicks, shake 6 px) fit real users
