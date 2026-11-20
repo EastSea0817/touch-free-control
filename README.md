@@ -18,7 +18,7 @@ injury, with ALS or with a strong tremor. I am building it as my individual proj
 
 ## Try it
 
-- **Windows app (the real tool):** download `TouchFreeControl-0.3.0-windows.zip` from
+- **Windows app (the real tool):** download `Nohands-0.4.0-windows.zip` from
   [Releases](https://github.com/EastSea0817/touch-free-control/releases), unzip it and run the `.exe`
   (Windows may warn about an unknown app: More info → Run anyway). Or build it yourself (see below).
 - **Browser demo (no install):** [eastsea0817.github.io/touch-free-control](https://eastsea0817.github.io/touch-free-control/)
@@ -37,7 +37,7 @@ webcam → face model (MediaPipe, on device) → head pose → my head range →
 The full picture, with the file for each step and where to look when something breaks:
 [docs/how-it-works.md](docs/how-it-works.md).
 
-## Desktop app (v0.3.0): controls the real Windows mouse
+## Desktop app (v0.4.0): controls the real Windows mouse
 
 The main app. It runs on Windows (Electron) and moves and clicks the **real** mouse, so it works in every program:
 the browser, Word, YouTube, games.
